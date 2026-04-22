@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VibeCheck ✨</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #fdf6f9;
+      --bg2: #fff0f5;
+      --card: #ffffff;
+      --border: #f5d9e8;
+      --pink: #f472b6;
+      --rose: #fb7185;
+      --peach: #fdba74;
+      --lilac: #c4b5fd;
+      --mint: #6ee7b7;
+      --sky: #93c5fd;
+      --text: #4a2c3a;
+      --muted: #b08fa0;
+      --soft: #f9e8f0;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content:'';
+      position:fixed; width:600px; height:600px;
+      background:radial-gradient(circle,#fce4ec66 0%,transparent 70%);
+      top:-200px; right:-200px;
+      pointer-events:none; z-index:0;
+    }
+    body::after {
+      content:'';
+      position:fixed; width:500px; height:500px;
+      background:radial-gradient(circle,#e8d5f966 0%,transparent 70%);
+      bottom:-150px; left:-150px;
+      pointer-events:none; z-index:0;
+    }
+
+    /* NAV */
+    nav {
+      position:sticky; top:0; z-index:100;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 40px;
+      background:rgba(253,246,249,0.88);
+      backdrop-filter:blur(20px);
+      border-bottom:1.5px solid var(--border);
+    }
+    .logo {
+      font-family:'Playfair Display',serif;
+      font-weight:700; font-size:1.5rem;
+      color:var(--pink); letter-spacing:-0.5px;
+    }
+    .logo span { color:var(--rose); font-style:italic; }
+    .live-badge {
+      display:flex; align-items:center; gap:7px;
+      background:#fff0f5; border:1.5px solid var(--border);
+      border-radius:100px; padding:6px 16px;
+      font-size:0.75rem; font-weight:700; color:var(--rose); letter-spacing:0.5px;
+    }
+    .live-dot {
+      width:8px; height:8px; background:var(--rose);
+      border-radius:50%; animation:blink 1.5s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+    /* HERO */
+    .hero {
+      position:relative; z-index:1;
+      text-align:center; padding:70px 24px 36px;
+    }
+    .hero-tag {
+      display:inline-block;
+      background:var(--soft); border:1.5px solid var(--border);
+      border-radius:100px; padding:6px 18px;
+      font-size:0.78rem; font-weight:700; color:var(--pink);
+      letter-spacing:1px; text-transform:uppercase; margin-bottom:20px;
+    }
+    .hero h1 {
+      font-family:'Playfair Display',serif;
+      font-size:clamp(2.4rem,6vw,4.8rem);
+      font-weight:700; line-height:1.1;
+      color:var(--text); letter-spacing:-1px;
+    }
+    .hero h1 em { font-style:italic; color:var(--pink); }
+    .hero p {
+      margin:18px auto 0; max-width:480px;
+      color:var(--muted); font-size:1rem; line-height:1.75;
+    }
+
+    /* STATS */
+    .stats-bar {
+      position:relative; z-index:1;
+      display:flex; justify-content:center;
+      margin:36px auto; max-width:600px;
+      background:var(--card); border:1.5px solid var(--border);
+      border-radius:24px; overflow:hidden;
+      box-shadow:0 4px 30px #f472b614;
+    }
+    .stat { flex:1; text-align:center; padding:22px 16px; border-right:1.5px solid var(--border); }
+    .stat:last-child { border-right:none; }
+    .stat-num { font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:var(--pink); }
+    .stat-label { font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+
+    /* MAP */
+    .map-section {
+      position:relative; z-index:1;
+      padding:0 24px; max-width:1060px; margin:0 auto;
+    }
+    .section-label {
+      font-size:0.72rem; text-transform:uppercase;
+      letter-spacing:2px; color:var(--muted);
+      font-weight:700; margin-bottom:14px;
+    }
+    .map-wrapper {
+      position:relative; background:var(--card);
+      border:1.5px solid var(--border); border-radius:28px;
+      overflow:hidden; height:460px;
+      box-shadow:0 8px 40px #f472b610;
+    }
+    .city-map { width:100%; height:100%; position:absolute; top:0; left:0; }
+
+    /* PINS */
+    .pin {
+      position:absolute; transform:translate(-50%,-100%);
+      display:flex; flex-direction:column; align-items:center;
+      cursor:pointer; z-index:10;
+      transition:transform 0.25s cubic-bezier(.34,1.56,.64,1);
+    }
+    .pin:hover { transform:translate(-50%,-108%) scale(1.12); }
+    .pin-bubble {
+      background:#fff; border:2px solid var(--border); border-radius:20px;
+      padding:10px 14px; display:flex; flex-direction:column;
+      align-items:center; gap:5px;
+      box-shadow:0 6px 24px #f472b620; min-width:88px; position:relative;
+    }
+    .pin-bubble::after {
+      content:''; position:absolute; bottom:-9px; left:50%;
+      transform:translateX(-50%);
+      border:9px solid transparent; border-top-color:#fff; border-bottom:none;
+    }
+    .pin-emoji { font-size:1.6rem; }
+    .pin-name { font-size:0.65rem; font-weight:700; color:var(--text); text-align:center; white-space:nowrap; }
+    .vibe-bar { width:56px; height:5px; background:var(--soft); border-radius:3px; overflow:hidden; }
+    .vibe-fill { height:100%; border-radius:3px; transition:width 1.2s ease; }
+    .pin-score { font-size:0.6rem; color:var(--muted); }
+
+    /* HEAT RINGS */
+    .heat-ring {
+      position:absolute; border-radius:50%;
+      transform:translate(-50%,-50%);
+      pointer-events:none;
+      animation:softPulse 3s ease-in-out infinite;
+    }
+    @keyframes softPulse {
+      0%,100%{ opacity:0.35; transform:translate(-50%,-50%) scale(1); }
+      50%{ opacity:0.1; transform:translate(-50%,-50%) scale(1.4); }
+    }
+
+    /* CARDS */
+    .places-grid {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(265px,1fr));
+      gap:16px; margin-top:36px; padding-bottom:60px;
+    }
+    .place-card {
+      background:var(--card); border:1.5px solid var(--border);
+      border-radius:22px; padding:20px;
+      display:flex; gap:14px; align-items:flex-start;
+      cursor:pointer;
+      transition:box-shadow 0.25s, transform 0.25s, border-color 0.25s;
+      box-shadow:0 2px 14px #f472b608;
+    }
+    .place-card:hover { transform:translateY(-4px); box-shadow:0 12px 36px #f472b618; border-color:var(--pink); }
+    .card-emoji { font-size:2.2rem; flex-shrink:0; }
+    .card-info { flex:1; }
+    .card-name { font-family:'Playfair Display',serif; font-size:0.95rem; font-weight:700; margin-bottom:3px; }
+    .card-vibe { font-size:0.76rem; color:var(--muted); margin-bottom:10px; }
+    .card-score-row { display:flex; align-items:center; gap:8px; }
+    .card-bar { flex:1; height:6px; background:var(--soft); border-radius:4px; overflow:hidden; }
+    .card-fill { height:100%; border-radius:4px; transition:width 1.2s ease; }
+    .card-score-num { font-size:0.75rem; font-weight:700; font-family:'Playfair Display',serif; }
+    .decay-tag {
+      display:inline-flex; align-items:center; gap:4px;
+      font-size:0.65rem; padding:4px 10px; border-radius:100px;
+      margin-top:8px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;
+    }
+    .card-msg { font-size:0.72rem; color:var(--muted); margin-top:7px; font-style:italic; }
+
+    /* TOOLTIP */
+    .tooltip {
+      position:fixed; background:#fff;
+      border:1.5px solid var(--border); border-radius:16px;
+      padding:14px 18px; font-size:0.82rem;
+      pointer-events:none; z-index:999;
+      opacity:0; transition:opacity 0.2s;
+      max-width:210px; line-height:1.7;
+      box-shadow:0 8px 30px #f472b620;
+    }
+    .tooltip.visible { opacity:1; }
+    .tooltip-title { font-family:'Playfair Display',serif; font-weight:700; color:var(--text); margin-bottom:4px; }
+
+    /* FOOTER */
+    footer {
+      text-align:center; padding:36px 24px;
+      color:var(--muted); font-size:0.78rem;
+      border-top:1.5px solid var(--border);
+      position:relative; z-index:1; background:var(--bg);
+    }
+    footer strong { color:var(--pink); font-family:'Playfair Display',serif; font-size:1rem; }
+
+    /* FLOATING HEARTS */
+    .hearts { position:fixed; top:0; left:0; right:0; bottom:0; pointer-events:none; overflow:hidden; z-index:0; }
+    .heart { position:absolute; opacity:0; animation:floatUp 8s ease-in infinite; }
+    @keyframes floatUp {
+      0%{ opacity:0; transform:translateY(0) scale(0.5); }
+      10%{ opacity:0.2; }
+      90%{ opacity:0.08; }
+      100%{ opacity:0; transform:translateY(-120vh) scale(1.2) rotate(20deg); }
+    }
+
+    @media(max-width:600px){
+      nav { padding:14px 20px; }
+      .map-wrapper { height:300px; }
+      .stats-bar { margin:24px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="hearts" id="hearts"></div>
+
+<nav>
+  <div class="logo">Vibe<span>Check</span> ✨</div>
+  <div class="live-badge"><span class="live-dot"></span> En vivo</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-tag">🗺 Mapa emocional · Puebla</div>
+  <h1>¿Dónde está<br/><em>el momento</em><br/>ahorita? 🌸</h1>
+  <p>Reporta la vibra del lugar donde estás y descubre qué rincones de la ciudad están brillando <em>ahora mismo.</em></p>
+</section>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-num" id="counter-users">0</div><div class="stat-label">Activos</div></div>
+  <div class="stat"><div class="stat-num" id="counter-places">0</div><div class="stat-label">Lugares</div></div>
+  <div class="stat"><div class="stat-num" id="counter-vibes">0</div><div class="stat-label">Vibras hoy</div></div>
+</div>
+
+<section class="map-section">
+  <div class="section-label">📍 Mapa en tiempo real</div>
+  <div class="map-wrapper" id="map">
+    <svg class="city-map" viewBox="0 0 1060 460" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#fff5f8"/>
+          <stop offset="100%" style="stop-color:#fce7f3"/>
+        </linearGradient>
+      </defs>
+      <rect width="1060" height="460" fill="url(#bgGrad)"/>
+      <g stroke="#f5d9e8" stroke-width="1.5" fill="none">
+        <line x1="0" y1="76" x2="1060" y2="76"/><line x1="0" y1="152" x2="1060" y2="152"/>
+        <line x1="0" y1="228" x2="1060" y2="228"/><line x1="0" y1="304" x2="1060" y2="304"/>
+        <line x1="0" y1="380" x2="1060" y2="380"/>
+        <line x1="106" y1="0" x2="106" y2="460"/><line x1="212" y1="0" x2="212" y2="460"/>
+        <line x1="318" y1="0" x2="318" y2="460"/><line x1="424" y1="0" x2="424" y2="460"/>
+        <line x1="530" y1="0" x2="530" y2="460"/><line x1="636" y1="0" x2="636" y2="460"/>
+        <line x1="742" y1="0" x2="742" y2="460"/><line x1="848" y1="0" x2="848" y2="460"/>
+        <line x1="954" y1="0" x2="954" y2="460"/>
+      </g>
+      <g fill="#fff0f5">
+        <rect x="12" y="84" width="82" height="58" rx="6"/><rect x="118" y="84" width="82" height="58" rx="6"/>
+        <rect x="224" y="84" width="82" height="58" rx="6"/><rect x="330" y="84" width="82" height="58" rx="6"/>
+        <rect x="436" y="84" width="82" height="58" rx="6"/><rect x="542" y="84" width="82" height="58" rx="6"/>
+        <rect x="648" y="84" width="82" height="58" rx="6"/><rect x="754" y="84" width="82" height="58" rx="6"/>
+        <rect x="860" y="84" width="82" height="58" rx="6"/>
+        <rect x="12" y="160" width="82" height="58" rx="6"/><rect x="118" y="160" width="82" height="58" rx="6"/>
+        <rect x="224" y="160" width="82" height="58" rx="6"/><rect x="330" y="160" width="82" height="58" rx="6"/>
+        <rect x="542" y="160" width="82" height="58" rx="6"/><rect x="648" y="160" width="82" height="58" rx="6"/>
+        <rect x="754" y="160" width="82" height="58" rx="6"/><rect x="860" y="160" width="82" height="58" rx="6"/>
+        <rect x="12" y="236" width="82" height="58" rx="6"/><rect x="118" y="236" width="82" height="58" rx="6"/>
+        <rect x="224" y="236" width="82" height="58" rx="6"/><rect x="330" y="236" width="82" height="58" rx="6"/>
+        <rect x="436" y="236" width="82" height="58" rx="6"/><rect x="542" y="236" width="82" height="58" rx="6"/>
+        <rect x="648" y="236" width="82" height="58" rx="6"/><rect x="754" y="236" width="82" height="58" rx="6"/>
+        <rect x="860" y="236" width="82" height="58" rx="6"/>
+        <rect x="12" y="312" width="82" height="58" rx="6"/><rect x="118" y="312" width="82" height="58" rx="6"/>
+        <rect x="224" y="312" width="82" height="58" rx="6"/><rect x="330" y="312" width="82" height="58" rx="6"/>
+        <rect x="436" y="312" width="82" height="58" rx="6"/><rect x="542" y="312" width="82" height="58" rx="6"/>
+        <rect x="648" y="312" width="82" height="58" rx="6"/><rect x="754" y="312" width="82" height="58" rx="6"/>
+        <rect x="860" y="312" width="82" height="58" rx="6"/>
+      </g>
+      <rect x="436" y="160" width="82" height="58" rx="6" fill="#d1fae5" opacity="0.7"/>
+      <text x="477" y="196" text-anchor="middle" font-size="24">🌸</text>
+    </svg>
+    <div id="pins-container"></div>
+  </div>
+
+  <div class="places-grid" id="places-grid"></div>
+</section>
+
+<footer>
+  <strong>VibeCheck ✨</strong><br/>
+  Demo Web · App Android en Kotlin + Firebase<br/>
+  <span style="font-size:0.7rem;margin-top:6px;display:block;color:#d4a0b8;">Los datos mostrados son simulados para esta demo 🌷</span>
+</footer>
+
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-title" id="tt-title"></div>
+  <div id="tt-body"></div>
+</div>
+
+<script>
+  const PLACES = [
+    { id:1, name:"Zona Gastronómica", area:"Centro", emoji:"🍜", vibe:"🔥 Está ardiendo", vibeColor:"#f472b6", score:94, decay:"hot", left:"27%", top:"52%", message:"¡Lleno y delicioso! 🙌", users:38 },
+    { id:2, name:"Parque Lineal", area:"Angelópolis", emoji:"🌿", vibe:"🌿 Buena onda", vibeColor:"#6ee7b7", score:71, decay:"stable", left:"47%", top:"37%", message:"Fresquito, ideal para pasear 🌸", users:22 },
+    { id:3, name:"Plaza Mayor", area:"Centro Histórico", emoji:"🎀", vibe:"🎉 Fiesta", vibeColor:"#fdba74", score:88, decay:"hot", left:"62%", top:"60%", message:"Evento en vivo, mucha gente ✨", users:55 },
+    { id:4, name:"Café Bonito", area:"Cholula", emoji:"☕", vibe:"☁️ Tranquilo", vibeColor:"#c4b5fd", score:42, decay:"cooling", left:"75%", top:"33%", message:"Perfecto para trabajar 💻", users:9 },
+    { id:5, name:"Rooftop Noche", area:"Reserva", emoji:"🌙", vibe:"💫 De moda", vibeColor:"#fb7185", score:97, decay:"hot", left:"84%", top:"63%", message:"La gente ya está formada 😱💕", users:73 },
+    { id:6, name:"Centro Comercial", area:"Angelópolis", emoji:"🛍️", vibe:"😊 Normal", vibeColor:"#93c5fd", score:55, decay:"stable", left:"38%", top:"72%", message:"Concurrido pero tranquilo 🛒", users:17 }
+  ];
+
+  // Floating hearts
+  const heartsEl = document.getElementById('hearts');
+  ['🌸','💗','✨','🌷','💕','🩷'].forEach(h => {
+    for(let i=0;i<2;i++){
+      const el=document.createElement('div'); el.className='heart'; el.textContent=h;
+      el.style.left=Math.random()*100+'vw';
+      el.style.animationDelay=(Math.random()*10)+'s';
+      el.style.animationDuration=(7+Math.random()*6)+'s';
+      el.style.fontSize=(0.7+Math.random()*0.7)+'rem';
+      heartsEl.appendChild(el);
+    }
+  });
+
+  // Pins
+  const container=document.getElementById('pins-container');
+  PLACES.forEach(p=>{
+    const size=50+p.score*0.55;
+    const ring=document.createElement('div'); ring.className='heat-ring';
+    ring.style.cssText=`left:${p.left};top:${p.top};width:${size}px;height:${size}px;background:radial-gradient(circle,${p.vibeColor}40 0%,transparent 70%);animation-delay:${Math.random()*3}s;`;
+    container.appendChild(ring);
+    const pin=document.createElement('div'); pin.className='pin';
+    pin.style.cssText=`left:${p.left};top:${p.top};`;
+    pin.innerHTML=`<div class="pin-bubble" style="border-color:${p.vibeColor}55;"><div class="pin-emoji">${p.emoji}</div><div class="pin-name">${p.name}</div><div class="vibe-bar"><div class="vibe-fill" style="width:${p.score}%;background:${p.vibeColor};"></div></div><div class="pin-score">${p.score} pts</div></div>`;
+    pin.addEventListener('mouseenter',e=>showTip(e,p));
+    pin.addEventListener('mousemove',moveTip);
+    pin.addEventListener('mouseleave',hideTip);
+    container.appendChild(pin);
+  });
+
+  // Cards
+  const grid=document.getElementById('places-grid');
+  const decayMap={ hot:{label:'🔥 Trending',bg:'#fce7f3',color:'#f472b6'}, stable:{label:'✅ Estable',bg:'#d1fae5',color:'#059669'}, cooling:{label:'📉 Bajando',bg:'#ede9fe',color:'#7c3aed'} };
+  PLACES.forEach(p=>{
+    const d=decayMap[p.decay];
+    const card=document.createElement('div'); card.className='place-card';
+    card.innerHTML=`<div class="card-emoji">${p.emoji}</div><div class="card-info"><div class="card-name">${p.name}</div><div class="card-vibe">${p.vibe} · ${p.area}</div><div class="card-score-row"><div class="card-bar"><div class="card-fill" style="width:${p.score}%;background:${p.vibeColor};"></div></div><span class="card-score-num" style="color:${p.vibeColor}">${p.score}</span></div><div class="decay-tag" style="background:${d.bg};color:${d.color};">${d.label}</div><div class="card-msg">"${p.message}"</div></div>`;
+    grid.appendChild(card);
+  });
+
+  // Tooltip
+  const tip=document.getElementById('tooltip');
+  function showTip(e,p){ document.getElementById('tt-title').textContent=p.emoji+' '+p.name; document.getElementById('tt-body').innerHTML=`${p.vibe}<br/><span style="color:var(--muted)">${p.users} personas ahora</span><br/><span style="color:var(--muted);font-style:italic;">"${p.message}"</span>`; tip.classList.add('visible'); moveTip(e); }
+  function moveTip(e){ tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-10)+'px'; }
+  function hideTip(){ tip.classList.remove('visible'); }
+
+  // Counters
+  function counter(el,target){ let v=0; const step=Math.ceil(target/88); const iv=setInterval(()=>{ v=Math.min(v+step,target); el.textContent=v.toLocaleString(); if(v>=target)clearInterval(iv); },16); }
+  setTimeout(()=>{ counter(document.getElementById('counter-users'),214); counter(document.getElementById('counter-places'),6); counter(document.getElementById('counter-vibes'),1347); },500);
+
+  // Live scores
+  setInterval(()=>{
+    PLACES.forEach(p=>{ if(p.decay==='hot') p.score=Math.min(99,p.score+Math.floor(Math.random()*3)); else if(p.decay==='cooling') p.score=Math.max(10,p.score-Math.floor(Math.random()*2)); });
+    document.querySelectorAll('.card-fill').forEach((el,i)=>{ if(PLACES[i]) el.style.width=PLACES[i].score+'%'; });
+    document.querySelectorAll('.card-score-num').forEach((el,i)=>{ if(PLACES[i]) el.textContent=PLACES[i].score; });
+  },3000);
+</script>
+</body>
+</html>
